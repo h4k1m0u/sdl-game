@@ -2,17 +2,17 @@
 #define SPRITE_RECTANGLE_HPP
 
 #include <sprites/sprite.hpp>
-#include <textures/texture_rectangle.hpp>
+#include <textures/texture.hpp>
 
 class SpriteRectangle : public Sprite {
 public:
   SpriteRectangle(SDL_Renderer* renderer, const SDL_Rect& rect);
-  bool limits_reached(const SDL_Point& canvas);
-  void check_collision(const SDL_Point& canvas, const SDL_Rect& rect_wall);
   void render();
+  void check_collision(const SDL_Point& size_canvas);
+  void check_collision(const SDL_Rect& rect_wall);
 
 private:
-  TextureRectangle m_texture;
+  Texture m_texture;
 };
 
 #endif // SPRITE_RECTANGLE_HPP

@@ -9,10 +9,10 @@
 #include <SDL2/SDL2_gfxPrimitives.h>
 
 #include <time/timer.hpp>
+#include <surfaces/image.hpp>
+#include <surfaces/text.hpp>
+#include <surfaces/rectangle.hpp>
 #include <textures/texture.hpp>
-#include <textures/texture_image.hpp>
-#include <textures/texture_text.hpp>
-#include <textures/texture_rectangle.hpp>
 #include <textures/texture_circle.hpp>
 #include <sprites/direction.hpp>
 #include <sprites/sprite_rectangle.hpp>
@@ -65,24 +65,24 @@ int main() {
   SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
   // load images inside textures
-  TextureImage background(renderer, "assets/images/background.png");
+  Texture background(renderer, Image("assets/images/background.png"));
 
   // timer texture
-  TextureText timer_text(renderer, "Timer: 0s", font);
+  Texture timer_text(renderer, Text("Timer: 0s", font));
   Timer timer;
 
   // fps texture
   int n_frames = 0;
-  TextureText fps_text(renderer, "FPS: 0", font);
+  Texture fps_text(renderer, Text("FPS: 0", font));
   Timer fps_timer;
 
   // red ball
-  TextureImage ball_red(renderer, "assets/images/ball.png");
+  Texture ball_red(renderer, Image("assets/images/ball.png"));
   int x_ball = -100;
   int y_ball = -100;
 
   // human character
-  TextureImage character(renderer, "assets/images/character.png");
+  Texture character(renderer, Image("assets/images/character.png"));
   std::vector<SDL_Rect> rects_src {
     {0,   0, 64,  205},
     {64,  0, 64, 205},
@@ -93,7 +93,8 @@ int main() {
 
   // sprites for rectangle & circle
   SpriteRectangle rect_sprite(renderer, {0, 0, 100, 100});
-  SpriteCircle circle_sprite(renderer, {CANVAS.x / 3, CANVAS.y / 3}, 50);
+  SpriteCircle circle_sprite_mobile(renderer, {CANVAS.x / 2, CANVAS.y / 2}, 25);
+  // SpriteCircle circle_sprite_immobile(renderer, {CANVAS.x / 4, CANVAS.y / 3}, 50);
 
   // wall
   SDL_Rect rect_wall {200, 200, CANVAS.x - 400, 25};
@@ -118,15 +119,19 @@ int main() {
 
           // move blue ball with directional arrows
           case SDLK_UP:
+            circle_sprite_mobile.set_direction(Direction::UP);
             rect_sprite.set_direction(Direction::UP);
             break;
           case SDLK_DOWN:
+            circle_sprite_mobile.set_direction(Direction::DOWN);
             rect_sprite.set_direction(Direction::DOWN);
             break;
           case SDLK_LEFT:
+            circle_sprite_mobile.set_direction(Direction::LEFT);
             rect_sprite.set_direction(Direction::LEFT);
             break;
           case SDLK_RIGHT:
+            circle_sprite_mobile.set_direction(Direction::RIGHT);
             rect_sprite.set_direction(Direction::RIGHT);
             break;
         }
@@ -145,40 +150,44 @@ int main() {
 
     // render background & text
     SDL_Rect rect_src_bg {0, 0, CANVAS.x, CANVAS.y};
-    background.render(0, 0, &rect_src_bg);
+    background.render({0, 0}, &rect_src_bg);
 
     // show time in text texture
     std::stringstream timer_str;
     timer_str << "Timer: " << static_cast<int>(timer.get_ticks()) << "s";
-    timer_text.update_text(timer_str.str());
-    timer_text.render(0, CANVAS.y - timer_text.get_height());
+    timer_text.update(Text(timer_str.str(), font));
+    timer_text.render({0, CANVAS.y - timer_text.get_height()});
 
     // show FPS in text texture
     ++n_frames;
     int fps = n_frames / fps_timer.get_ticks();
     std::stringstream fps_str;
     fps_str << "FPS: " << fps;
-    fps_text.update_text(fps_str.str());
-    fps_text.render(CANVAS.x - fps_text.get_width(), CANVAS.y - fps_text.get_height());
+    fps_text.update(Text(fps_str.str(), font));
+    fps_text.render({CANVAS.x - fps_text.get_width(), CANVAS.y - fps_text.get_height()});
 
     // draw red ball at mouse click location
     SDL_Rect rect_src_ball {0, 0, 100, 100};
-    ball_red.render(x_ball, y_ball, &rect_src_ball);
+    ball_red.render({x_ball, y_ball}, &rect_src_ball);
 
     // draw movable red rectangle
     rect_sprite.move();
-    rect_sprite.check_collision(CANVAS, rect_wall);
+    rect_sprite.check_collision(CANVAS);
+    rect_sprite.check_collision(rect_wall);
     rect_sprite.render();
 
-    // draw green circle
-    circle_sprite.render();
+    // draw both blue circles
+    circle_sprite_mobile.move();
+    circle_sprite_mobile.check_collision(CANVAS);
+    circle_sprite_mobile.render();
+    // circle_sprite_immobile.render();
 
     // draw horizontal wall
     SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00,0xff);
     SDL_RenderFillRect(renderer, &rect_wall);
 
     // render character frames
-    character.render(CANVAS.x / 2, CANVAS.y / 2, &rects_src[frame_character / 4]);
+    character.render({CANVAS.x / 2, CANVAS.y / 2}, &rects_src[frame_character / 4]);
     ++frame_character;
     if (frame_character == 16) {
       frame_character = 0;

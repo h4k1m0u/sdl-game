@@ -1,35 +1,28 @@
 #include <sprites/sprite_rectangle.hpp>
+#include <surfaces/rectangle.hpp>
 #include <algorithm>
 
 SpriteRectangle::SpriteRectangle(SDL_Renderer* renderer, const SDL_Rect& rect):
   Sprite({rect.x, rect.y}),
-  m_texture(TextureRectangle(renderer, {rect.w, rect.h}))
+  m_texture(Texture(renderer, Rectangle({rect.w, rect.h}, {0xff, 0x00, 0x00})))
 {
 }
 
 void SpriteRectangle::render() {
-  m_texture.render(m_x, m_y);
+  m_texture.render(m_position);
 }
 
-bool SpriteRectangle::limits_reached(const SDL_Point& canvas) {
-  if (m_x < 0 || m_x > canvas.x - m_texture.get_width() || m_y < 0 || m_y > canvas.y - m_texture.get_height()) {
-    return true;
-  }
-  return false;
+void SpriteRectangle::check_collision(const SDL_Point& size_canvas) {
+  // prevent sprite from leaving screen
+  int width = m_texture.get_width();
+  int height = m_texture.get_height();
+  confine({0, 0, size_canvas.x - width, size_canvas.y - height});
 }
 
-void SpriteRectangle::check_collision(const SDL_Point& canvas, const SDL_Rect& rect_wall) {
-  // confine sprite to canvas limits & stop it from moving once outside
-  if (limits_reached(canvas)) {
-    m_x -= m_velocity_x;
-    m_y -= m_velocity_y;
-    set_direction(Direction::NONE);
-    return;
-  }
-
+void SpriteRectangle::check_collision(const SDL_Rect& rect_wall) {
   // two extremities of sprite bounding box
-  SDL_Point p1 {m_x, m_y};
-  SDL_Point p2 {m_x + m_texture.get_width(), m_y + m_texture.get_height()};
+  SDL_Point p1(m_position);
+  SDL_Point p2 {m_position.x + m_texture.get_width(), m_position.y + m_texture.get_height()};
 
   // two extremities of wall bounding box
   SDL_Point p3 {rect_wall.x, rect_wall.y};
@@ -41,8 +34,8 @@ void SpriteRectangle::check_collision(const SDL_Point& canvas, const SDL_Rect& r
 
   // stop sprite on bboxes intersection
   if (p5.x < p6.x && p5.y < p6.y) {
-    m_x -= m_velocity_x;
-    m_y -= m_velocity_y;
+    m_position.x -= m_velocity.x;
+    m_position.y -= m_velocity.y;
     set_direction(Direction::NONE);
   }
 }

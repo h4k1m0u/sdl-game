@@ -8,6 +8,7 @@ class SpriteCircle : public Sprite {
 public:
   SpriteCircle(SDL_Renderer* renderer, const SDL_Point& center, int radius);
   void render();
+  void check_collision(const SDL_Point& size_canvas);
 
 private:
   TextureCircle m_texture;

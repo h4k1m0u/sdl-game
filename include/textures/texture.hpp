@@ -2,12 +2,14 @@
 #define TEXTURE_HPP
 
 #include <SDL.h>
+#include <surfaces/surface.hpp>
 
 class Texture {
 public:
-  Texture(SDL_Renderer* renderer);
+  Texture(SDL_Renderer* renderer, const Surface& surface);
   ~Texture();
-  void render(int x, int y, SDL_Rect* rect_src=NULL);
+  void update(const Surface& surface);
+  void render(const SDL_Point& position, SDL_Rect* rect_src=NULL) const;
   int get_width() const;
   int get_height() const;
   void set_texture(SDL_Surface* surface);
@@ -17,8 +19,7 @@ protected:
 
 private:
   SDL_Texture* m_texture;
-  int m_width;
-  int m_height;
+  SDL_Point m_size;
 };
 
 #endif // TEXTURE_HPP
