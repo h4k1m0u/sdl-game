@@ -37,14 +37,6 @@ void Sprite::move() {
   m_position.y += m_velocity.y;
 }
 
-int Sprite::get_x() const {
-  return m_position.x;
-}
-
-int Sprite::get_y() const {
-  return m_position.y;
-}
-
 void Sprite::confine(const SDL_Rect& canvas) {
   // confine position to range of coords (x to w, y to h)
   if (m_position.x < canvas.x || m_position.x > canvas.w ||
@@ -53,4 +45,8 @@ void Sprite::confine(const SDL_Rect& canvas) {
     m_position.y -= m_velocity.y;
     set_direction(Direction::NONE);
   }
+}
+
+SDL_Point Sprite::get_position() const {
+  return m_position;
 }

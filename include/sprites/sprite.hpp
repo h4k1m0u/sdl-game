@@ -8,9 +8,8 @@ class Sprite {
 public:
   Sprite(const SDL_Point& position);
   void move();
-  int get_x() const;
-  int get_y() const;
   void set_direction(Direction direction);
+  SDL_Point get_position() const;
 
 protected:
   SDL_Point m_position;

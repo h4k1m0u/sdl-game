@@ -6,7 +6,6 @@
 #include <vector>
 #include <sstream>
 #include <cmath>
-#include <SDL2/SDL2_gfxPrimitives.h>
 
 #include <time/timer.hpp>
 #include <surfaces/image.hpp>
@@ -91,13 +90,13 @@ int main() {
   };
   unsigned char frame_character = 0;
 
-  // sprites for rectangle & circle
-  SpriteRectangle rect_sprite(renderer, {0, 0, 100, 100});
-  SpriteCircle circle_sprite_mobile(renderer, {CANVAS.x / 2, CANVAS.y / 2}, 25);
-  // SpriteCircle circle_sprite_immobile(renderer, {CANVAS.x / 4, CANVAS.y / 3}, 50);
+  // props non-movable sprites
+  SpriteRectangle rect_sprite_prop(renderer, {200, 200, CANVAS.x - 400, 25});
+  SpriteCircle circle_sprite_prop(renderer, {CANVAS.x / 4, CANVAS.y / 3}, 50);
 
-  // wall
-  SDL_Rect rect_wall {200, 200, CANVAS.x - 400, 25};
+  // sprites for movable rectangle & circle
+  SpriteRectangle rect_sprite(renderer, {0, 0, 100, 100});
+  SpriteCircle circle_sprite(renderer, {CANVAS.x / 2, CANVAS.y / 2}, 25);
 
   // main loop
   SDL_Event event;
@@ -119,19 +118,19 @@ int main() {
 
           // move blue ball with directional arrows
           case SDLK_UP:
-            circle_sprite_mobile.set_direction(Direction::UP);
+            circle_sprite.set_direction(Direction::UP);
             rect_sprite.set_direction(Direction::UP);
             break;
           case SDLK_DOWN:
-            circle_sprite_mobile.set_direction(Direction::DOWN);
+            circle_sprite.set_direction(Direction::DOWN);
             rect_sprite.set_direction(Direction::DOWN);
             break;
           case SDLK_LEFT:
-            circle_sprite_mobile.set_direction(Direction::LEFT);
+            circle_sprite.set_direction(Direction::LEFT);
             rect_sprite.set_direction(Direction::LEFT);
             break;
           case SDLK_RIGHT:
-            circle_sprite_mobile.set_direction(Direction::RIGHT);
+            circle_sprite.set_direction(Direction::RIGHT);
             rect_sprite.set_direction(Direction::RIGHT);
             break;
         }
@@ -170,21 +169,22 @@ int main() {
     SDL_Rect rect_src_ball {0, 0, 100, 100};
     ball_red.render({x_ball, y_ball}, &rect_src_ball);
 
-    // draw movable red rectangle
+    // draw props sprites
+    rect_sprite_prop.render();
+    circle_sprite_prop.render();
+
+    // draw movable sprite rectangle & check for its collision
     rect_sprite.move();
     rect_sprite.check_collision(CANVAS);
-    rect_sprite.check_collision(rect_wall);
+    rect_sprite.check_collision(rect_sprite_prop);
     rect_sprite.render();
 
-    // draw both blue circles
-    circle_sprite_mobile.move();
-    circle_sprite_mobile.check_collision(CANVAS);
-    circle_sprite_mobile.render();
-    // circle_sprite_immobile.render();
-
-    // draw horizontal wall
-    SDL_SetRenderDrawColor(renderer, 0x00, 0xff, 0x00,0xff);
-    SDL_RenderFillRect(renderer, &rect_wall);
+    // draw movable sprite circle & check for collision
+    circle_sprite.move();
+    circle_sprite.check_collision(CANVAS);
+    circle_sprite.check_collision(circle_sprite_prop);
+    circle_sprite.check_collision(rect_sprite_prop);
+    circle_sprite.render();
 
     // render character frames
     character.render({CANVAS.x / 2, CANVAS.y / 2}, &rects_src[frame_character / 4]);
