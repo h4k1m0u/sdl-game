@@ -103,6 +103,10 @@ int main() {
   SpriteRectangle rect_sprite(renderer, {SCREEN.x / 2, SCREEN.y / 2, 100, 100});
   SpriteCircle circle_sprite(renderer, {SCREEN.x / 2, SCREEN.y / 3}, 25);
 
+  // scrolling clouds 
+  Texture clouds(renderer, Image("assets/images/clouds.png"));
+  int offset_clouds = 0;
+
   // main loop
   SDL_Event event;
   bool is_quit = false;
@@ -161,6 +165,14 @@ int main() {
     SDL_Rect rect_camera = camera.rect();
     background.render({0, 0}, &rect_camera);
 
+    // render moving clouds twice (right-to-left scrolling)
+    clouds.render({offset_clouds, 0});
+    clouds.render({offset_clouds + clouds.get_width(), 0});
+    --offset_clouds;
+    if (offset_clouds < -clouds.get_width()) {
+      offset_clouds = 0;
+    }
+
     // show time in text texture
     std::stringstream timer_str;
     timer_str << "Timer: " << static_cast<int>(timer.get_ticks()) << "s";
@@ -180,8 +192,8 @@ int main() {
     ball_red.render({x_ball, y_ball}, &rect_src_ball);
 
     // draw props sprites
-    rect_sprite_prop.render();
-    circle_sprite_prop.render();
+    rect_sprite_prop.render(camera);
+    circle_sprite_prop.render(camera);
 
     // draw movable sprite rectangle (relative to camera) & check for its collision
     rect_sprite.check_collision(LEVEL);
@@ -192,10 +204,10 @@ int main() {
     circle_sprite.check_collision(LEVEL);
     circle_sprite.check_collision(circle_sprite_prop);
     circle_sprite.check_collision(rect_sprite_prop);
-    circle_sprite.render();
+    circle_sprite.render(camera);
 
     // render character frames
-    character.render({SCREEN.x / 2, SCREEN.y / 2}, &rects_src[frame_character / 4]);
+    character.render({SCREEN.x / 2 - camera.x, SCREEN.y / 2 - camera.y}, &rects_src[frame_character / 4]);
     ++frame_character;
     if (frame_character == 16) {
       frame_character = 0;

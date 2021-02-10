@@ -59,6 +59,9 @@ make
 
 # Assets
 **Music**: [Menu Music][music] by [mrpoly][author-music], license: Public Domain.
+**Clouds**: [Clouds in the background][clouds] by [Santoniche][clouds-author], license: CC-BY 4.0
 
 [music]: https://opengameart.org/content/menu-music
 [author-music]: https://opengameart.org/users/mrpoly
+[clouds]: https://opengameart.org/content/cute-clouds
+[clouds-author]: https://opengameart.org/users/santoniche

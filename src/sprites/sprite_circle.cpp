@@ -14,6 +14,11 @@ void SpriteCircle::render() {
   m_texture.render(m_position);
 }
 
+void SpriteCircle::render(const Camera& camera) {
+  // rendering relatively to camera coordinates (keeps sprite centered)
+  m_texture.render({m_position.x - camera.x, m_position.y - camera.y});
+}
+
 int SpriteCircle::get_radius() const {
   return m_radius;
 }
