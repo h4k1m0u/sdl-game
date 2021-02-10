@@ -14,6 +14,11 @@ void SpriteRectangle::render() {
   m_texture.render(m_position);
 }
 
+void SpriteRectangle::render(const Camera& camera) {
+  // rendering relatively to camera coordinates (keeps sprite centered)
+  m_texture.render({m_position.x - camera.x, m_position.y - camera.y});
+}
+
 void SpriteRectangle::check_collision(const SDL_Point& size_canvas) {
   // prevent sprite from leaving screen
   confine({0, 0, size_canvas.x - m_width, size_canvas.y - m_height});

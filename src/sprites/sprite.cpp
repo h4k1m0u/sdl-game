@@ -8,10 +8,6 @@ Sprite::Sprite(const SDL_Point& position):
 {
 }
 
-void Sprite::set_direction(Direction direction) {
-  m_direction = direction;
-}
-
 void Sprite::move() {
   // restrict direction to either horizontal or vertical
   switch (m_direction) {
@@ -45,6 +41,10 @@ void Sprite::confine(const SDL_Rect& canvas) {
     m_position.y -= m_velocity.y;
     set_direction(Direction::NONE);
   }
+}
+
+void Sprite::set_direction(Direction direction) {
+  m_direction = direction;
 }
 
 SDL_Point Sprite::get_position() const {

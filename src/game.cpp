@@ -16,6 +16,7 @@
 #include <sprites/direction.hpp>
 #include <sprites/sprite_rectangle.hpp>
 #include <sprites/sprite_circle.hpp>
+#include <navigation/camera.hpp>
 
 int main() {
   // initialize SDL & its extensions
@@ -51,9 +52,13 @@ int main() {
   Mix_Music* music = Mix_LoadMUS("assets/sounds/music.wav");
   // Mix_PlayMusic(music, -1);
 
+  // camera (same size as screen) scrolling inside level
+  const SDL_Point LEVEL {1280, 960};
+  const SDL_Point SCREEN {640, 480};
+  Camera camera({0, 0, SCREEN.x, SCREEN.y});
+
   // create window
-  const SDL_Point CANVAS {800, 600};
-  SDL_Window* window = SDL_CreateWindow("2D Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, CANVAS.x, CANVAS.y, 0);
+  SDL_Window* window = SDL_CreateWindow("2D Game", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN.x, SCREEN.y, 0);
   SDL_Surface* surface_window = SDL_GetWindowSurface(window);
   if (window == NULL || surface_window == NULL) {
     std::cout << "Error while creating window or when retrieving its surface" << std::endl;
@@ -91,12 +96,12 @@ int main() {
   unsigned char frame_character = 0;
 
   // props non-movable sprites
-  SpriteRectangle rect_sprite_prop(renderer, {200, 200, CANVAS.x - 400, 25});
-  SpriteCircle circle_sprite_prop(renderer, {CANVAS.x / 4, CANVAS.y / 3}, 50);
+  SpriteRectangle rect_sprite_prop(renderer, {200, 200, SCREEN.x - 400, 25});
+  SpriteCircle circle_sprite_prop(renderer, {SCREEN.x / 4, SCREEN.y / 3}, 50);
 
   // sprites for movable rectangle & circle
-  SpriteRectangle rect_sprite(renderer, {0, 0, 100, 100});
-  SpriteCircle circle_sprite(renderer, {CANVAS.x / 2, CANVAS.y / 2}, 25);
+  SpriteRectangle rect_sprite(renderer, {SCREEN.x / 2, SCREEN.y / 2, 100, 100});
+  SpriteCircle circle_sprite(renderer, {SCREEN.x / 2, SCREEN.y / 3}, 25);
 
   // main loop
   SDL_Event event;
@@ -143,19 +148,24 @@ int main() {
       }
     }
 
+    // update coordinates of mobile sprites & camera accordingly
+    rect_sprite.move();
+    circle_sprite.move();
+    camera.track(rect_sprite, LEVEL);
+
     // clear screen in white
     SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff ,0xff);
     SDL_RenderClear(renderer);
 
     // render background & text
-    SDL_Rect rect_src_bg {0, 0, CANVAS.x, CANVAS.y};
-    background.render({0, 0}, &rect_src_bg);
+    SDL_Rect rect_camera = camera.rect();
+    background.render({0, 0}, &rect_camera);
 
     // show time in text texture
     std::stringstream timer_str;
     timer_str << "Timer: " << static_cast<int>(timer.get_ticks()) << "s";
     timer_text.update(Text(timer_str.str(), font));
-    timer_text.render({0, CANVAS.y - timer_text.get_height()});
+    timer_text.render({0, SCREEN.y - timer_text.get_height()});
 
     // show FPS in text texture
     ++n_frames;
@@ -163,7 +173,7 @@ int main() {
     std::stringstream fps_str;
     fps_str << "FPS: " << fps;
     fps_text.update(Text(fps_str.str(), font));
-    fps_text.render({CANVAS.x - fps_text.get_width(), CANVAS.y - fps_text.get_height()});
+    fps_text.render({SCREEN.x - fps_text.get_width(), SCREEN.y - fps_text.get_height()});
 
     // draw red ball at mouse click location
     SDL_Rect rect_src_ball {0, 0, 100, 100};
@@ -173,21 +183,19 @@ int main() {
     rect_sprite_prop.render();
     circle_sprite_prop.render();
 
-    // draw movable sprite rectangle & check for its collision
-    rect_sprite.move();
-    rect_sprite.check_collision(CANVAS);
+    // draw movable sprite rectangle (relative to camera) & check for its collision
+    rect_sprite.check_collision(LEVEL);
     rect_sprite.check_collision(rect_sprite_prop);
-    rect_sprite.render();
+    rect_sprite.render(camera);
 
     // draw movable sprite circle & check for collision
-    circle_sprite.move();
-    circle_sprite.check_collision(CANVAS);
+    circle_sprite.check_collision(LEVEL);
     circle_sprite.check_collision(circle_sprite_prop);
     circle_sprite.check_collision(rect_sprite_prop);
     circle_sprite.render();
 
     // render character frames
-    character.render({CANVAS.x / 2, CANVAS.y / 2}, &rects_src[frame_character / 4]);
+    character.render({SCREEN.x / 2, SCREEN.y / 2}, &rects_src[frame_character / 4]);
     ++frame_character;
     if (frame_character == 16) {
       frame_character = 0;

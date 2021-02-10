@@ -1,4 +1,5 @@
 #include <textures/texture.hpp>
+#include <iostream>
 
 Texture::Texture(SDL_Renderer* renderer, const Surface& surface):
   m_renderer(renderer),
@@ -16,7 +17,7 @@ void Texture::update(const Surface& surface) {
 
 void Texture::render(const SDL_Point& position, SDL_Rect* rect_src) const {
   // render texture at position (upper-left corner given)
-  SDL_Rect rect_dst {position.x, position.y, m_size.x, m_size.y};
+  SDL_Rect rect_dst {position.x, position.y, get_width(), get_height()};
 
   // rectangle used to crop texture
   if (rect_src != NULL) {
