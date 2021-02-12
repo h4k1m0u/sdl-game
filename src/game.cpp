@@ -17,6 +17,7 @@
 #include <sprites/sprite_rectangle.hpp>
 #include <sprites/sprite_circle.hpp>
 #include <navigation/camera.hpp>
+#include <particles/particle_emitter.hpp>
 
 int main() {
   // initialize SDL & its extensions
@@ -96,16 +97,22 @@ int main() {
   unsigned char frame_character = 0;
 
   // props non-movable sprites
-  SpriteRectangle rect_sprite_prop(renderer, {200, 200, SCREEN.x - 400, 25});
-  SpriteCircle circle_sprite_prop(renderer, {SCREEN.x / 4, SCREEN.y / 3}, 50);
+  SpriteRectangle sprite_prop(renderer, {200, 200, SCREEN.x - 400, 25});
 
-  // sprites for movable rectangle & circle
-  SpriteRectangle rect_sprite(renderer, {SCREEN.x / 2, SCREEN.y / 2, 100, 100});
-  SpriteCircle circle_sprite(renderer, {SCREEN.x / 2, SCREEN.y / 3}, 25);
+  // sprites for movable rectangle
+  SpriteRectangle sprite(renderer, {SCREEN.x / 2, SCREEN.y / 2, 100, 100});
 
-  // scrolling clouds 
+  // scrolling clouds
   Texture clouds(renderer, Image("assets/images/clouds.png"));
   int offset_clouds = 0;
+
+  // particles emitter
+  SDL_Point position_sprite(sprite.get_position());
+  ParticleEmitter particle_emitter(position_sprite, {
+    Texture(renderer, Image("assets/images/particles/blue.bmp")),
+    Texture(renderer, Image("assets/images/particles/green.bmp")),
+    Texture(renderer, Image("assets/images/particles/red.bmp"))
+  }, Texture(renderer, Image("assets/images/particles/shine.bmp")));
 
   // main loop
   SDL_Event event;
@@ -127,22 +134,20 @@ int main() {
 
           // move blue ball with directional arrows
           case SDLK_UP:
-            circle_sprite.set_direction(Direction::UP);
-            rect_sprite.set_direction(Direction::UP);
+            sprite.set_direction(Direction::UP);
             break;
           case SDLK_DOWN:
-            circle_sprite.set_direction(Direction::DOWN);
-            rect_sprite.set_direction(Direction::DOWN);
+            sprite.set_direction(Direction::DOWN);
             break;
           case SDLK_LEFT:
-            circle_sprite.set_direction(Direction::LEFT);
-            rect_sprite.set_direction(Direction::LEFT);
+            sprite.set_direction(Direction::LEFT);
             break;
           case SDLK_RIGHT:
-            circle_sprite.set_direction(Direction::RIGHT);
-            rect_sprite.set_direction(Direction::RIGHT);
+            sprite.set_direction(Direction::RIGHT);
             break;
         }
+      } else if (event.type == SDL_KEYUP) {
+        sprite.set_direction(Direction::NONE);
       } else if (event.type == SDL_MOUSEBUTTONDOWN) {
        if (event.button.button == SDL_BUTTON_LEFT) {
           x_ball = event.button.x - (ball_red.get_width() / 4);
@@ -153,9 +158,8 @@ int main() {
     }
 
     // update coordinates of mobile sprites & camera accordingly
-    rect_sprite.move();
-    circle_sprite.move();
-    camera.track(rect_sprite, LEVEL);
+    sprite.move();
+    camera.track(sprite, LEVEL);
 
     // clear screen in white
     SDL_SetRenderDrawColor(renderer, 0xff, 0xff, 0xff ,0xff);
@@ -189,22 +193,19 @@ int main() {
 
     // draw red ball at mouse click location
     SDL_Rect rect_src_ball {0, 0, 100, 100};
-    ball_red.render({x_ball, y_ball}, &rect_src_ball);
+    ball_red.render({x_ball - camera.x, y_ball - camera.y}, &rect_src_ball);
 
     // draw props sprites
-    rect_sprite_prop.render(camera);
-    circle_sprite_prop.render(camera);
+    sprite_prop.render(camera);
 
     // draw movable sprite rectangle (relative to camera) & check for its collision
-    rect_sprite.check_collision(LEVEL);
-    rect_sprite.check_collision(rect_sprite_prop);
-    rect_sprite.render(camera);
+    sprite.check_collision(LEVEL);
+    sprite.check_collision(sprite_prop);
+    sprite.render(camera);
 
-    // draw movable sprite circle & check for collision
-    circle_sprite.check_collision(LEVEL);
-    circle_sprite.check_collision(circle_sprite_prop);
-    circle_sprite.check_collision(rect_sprite_prop);
-    circle_sprite.render(camera);
+    // render particles using emitter
+    position_sprite = {sprite.get_position()};
+    particle_emitter.render({position_sprite.x - camera.x, position_sprite.y - camera.y});
 
     // render character frames
     character.render({SCREEN.x / 2 - camera.x, SCREEN.y / 2 - camera.y}, &rects_src[frame_character / 4]);

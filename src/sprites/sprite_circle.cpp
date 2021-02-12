@@ -1,4 +1,5 @@
 #include <sprites/sprite_circle.hpp>
+#include <surfaces/circle.hpp>
 #include <cmath>
 #include <iostream>
 
@@ -8,6 +9,10 @@ SpriteCircle::SpriteCircle(SDL_Renderer* renderer, const SDL_Point& center, int 
   m_radius(radius),
   m_center(center)
 {
+}
+
+SpriteCircle::~SpriteCircle() {
+  m_texture.free();
 }
 
 void SpriteCircle::render() {

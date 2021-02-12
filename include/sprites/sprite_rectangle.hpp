@@ -2,12 +2,13 @@
 #define SPRITE_RECTANGLE_HPP
 
 #include <sprites/sprite.hpp>
-#include <textures/texture.hpp>
 #include <navigation/camera.hpp>
+#include <textures/texture.hpp>
 
 class SpriteRectangle : public Sprite {
 public:
   SpriteRectangle(SDL_Renderer* renderer, const SDL_Rect& rect);
+  ~SpriteRectangle();
   void render();
   void render(const Camera& camera);
   void check_collision(const SDL_Point& size_canvas);

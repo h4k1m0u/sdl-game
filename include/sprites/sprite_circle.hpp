@@ -3,12 +3,13 @@
 
 #include <sprites/sprite.hpp>
 #include <sprites/sprite_rectangle.hpp>
-#include <textures/texture_circle.hpp>
 #include <navigation/camera.hpp>
+#include <textures/texture_circle.hpp>
 
 class SpriteCircle : public Sprite {
 public:
   SpriteCircle(SDL_Renderer* renderer, const SDL_Point& center, int radius);
+  ~SpriteCircle();
   void render();
   void render(const Camera& camera);
   void check_collision(const SDL_Point& size_canvas);

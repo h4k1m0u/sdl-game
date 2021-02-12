@@ -34,14 +34,14 @@ sudo make install
 
 # Build with g++
 ```bash
-g++ game.cpp -lSDL2  -o game
+g++ game.cpp -I/usr/include/SDL2/ -lSDL2 -lSDL2_image -o game
 ```
 
 # Build with CMake
 ```bash
 mkdir build && cd build
 cmake ..
-make
+make -j4
 ```
 
 # Resources

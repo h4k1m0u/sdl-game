@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <sprites/direction.hpp>
+#include <textures/texture.hpp>
 
 class Sprite {
 public:
@@ -19,7 +20,7 @@ protected:
 
 private:
   Direction m_direction;
-  const int VELOCITY = 5;
+  static const int VELOCITY = 10;
 };
 
 #endif // SPRITE_HPP

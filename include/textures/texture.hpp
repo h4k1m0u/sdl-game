@@ -7,9 +7,9 @@
 class Texture {
 public:
   Texture(SDL_Renderer* renderer, const Surface& surface);
-  ~Texture();
+  void free();
   void update(const Surface& surface);
-  void render(const SDL_Point& position, SDL_Rect* rect_src=NULL) const;
+  void render(const SDL_Point& position, SDL_Rect* rect_src=NULL, Uint8 transparency=0xff) const;
   int get_width() const;
   int get_height() const;
   void set_texture(SDL_Surface* surface);

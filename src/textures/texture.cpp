@@ -10,12 +10,18 @@ Texture::Texture(SDL_Renderer* renderer, const Surface& surface):
   m_texture = SDL_CreateTextureFromSurface(m_renderer, surface.surf);
 }
 
+void Texture::free() {
+  // called from texture owner (sprite or particle emitter)
+  SDL_DestroyTexture(m_texture);
+  m_texture = NULL;
+}
+
 void Texture::update(const Surface& surface) {
   // used to update timer text
   m_texture = SDL_CreateTextureFromSurface(m_renderer, surface.surf);
 }
 
-void Texture::render(const SDL_Point& position, SDL_Rect* rect_src) const {
+void Texture::render(const SDL_Point& position, SDL_Rect* rect_src, Uint8 transparency) const {
   // render texture at position (upper-left corner given)
   SDL_Rect rect_dst {position.x, position.y, get_width(), get_height()};
 
@@ -25,12 +31,9 @@ void Texture::render(const SDL_Point& position, SDL_Rect* rect_src) const {
     rect_dst.h = rect_src->h;
   }
 
+  // apply transparency
+  SDL_SetTextureAlphaMod(m_texture, transparency);
   SDL_RenderCopy(m_renderer, m_texture, rect_src, &rect_dst);
-}
-
-Texture::~Texture() {
-  SDL_DestroyTexture(m_texture);
-  m_texture = NULL;
 }
 
 int Texture::get_width() const {
