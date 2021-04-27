@@ -4,7 +4,7 @@
 
 SpriteRectangle::SpriteRectangle(SDL_Renderer* renderer, const SDL_Rect& rect):
   Sprite({rect.x, rect.y}),
-  m_texture(Texture(renderer, Rectangle({rect.w, rect.h}, {0xff, 0xff, 0xff}))),
+  m_texture(Texture(renderer, Rectangle({rect.w, rect.h}, {0xff, 0xff, 0xff, 0xff}))),
   m_width(m_texture.get_width()),
   m_height(m_texture.get_height())
 {
